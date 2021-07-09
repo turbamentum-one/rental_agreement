@@ -1,0 +1,22 @@
+[package]
+name = "rental-agreement"
+description = ""
+version = "0.1.0"
+license = "GPL-3.0"
+authors = ["Alex Maslakoff <desarrollo@serendipia.email>"]
+keywords = ["solana", "smart contracts", "blockchain"]
+edition = "2018"
+
+[features]
+exclude_entrypoint = []
+
+[dependencies]
+solana-program = "1.7"
+thiserror = "1.0.25"
+borsh = "0.9"
+borsh-derive = "0.9"
+
+
+[lib]
+name = "rental_agreement"
+crate-type = ["cdylib", "lib"]
