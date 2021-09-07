@@ -9,7 +9,7 @@ Manage rental agreements between a property owner and tenant.
 cargo build-bpf
 ```
 
-## Deploy to devnet
+## Deploy to a net
 ### Validate Solana Configuration
 Your solana environment should point to testnet or devnet
 

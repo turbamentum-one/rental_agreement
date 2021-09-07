@@ -68,16 +68,8 @@ impl Processor {
         duration_unit: u8,
     ) -> ProgramResult {
         let accounts_iter = &mut accounts.iter();
-
         let rent_agreement_account = next_account_info(accounts_iter)?;
-        if rent_agreement_account.owner != program_id {
-            msg!(
-                "{} Rent agreement account not owned by this program",
-                LOG_TAG_NAME
-            );
-            return Err(ProgramError::IncorrectProgramId);
-        }
-
+        Self::validate_program_owner(rent_agreement_account.owner, program_id)?;
         let solana_rent = &Rent::from_account_info(next_account_info(accounts_iter)?)?;
         if !solana_rent.is_exempt(
             rent_agreement_account.lamports(),
@@ -131,16 +123,8 @@ impl Processor {
 
     fn pay_rent(accounts: &[AccountInfo], program_id: &Pubkey, rent_amount: u64) -> ProgramResult {
         let accounts_iter = &mut accounts.iter();
-
         let rent_agreement_account = next_account_info(accounts_iter)?;
-        if rent_agreement_account.owner != program_id {
-            msg!(
-                "{}, Rent agreement account is not owned by this program",
-                LOG_TAG_NAME
-            );
-            return Err(ProgramError::IncorrectProgramId);
-        }
-
+        Self::validate_program_owner(rent_agreement_account.owner, program_id)?;
         let flat_owner_account: &AccountInfo = next_account_info(accounts_iter)?;
         let tenant_account = next_account_info(accounts_iter)?;
         let system_program_account = next_account_info(accounts_iter)?;
@@ -248,15 +232,23 @@ impl Processor {
         program_id: &Pubkey,
     ) -> ProgramResult {
         let accounts_iter = &mut accounts.iter();
-
         let rent_agreement_account = next_account_info(accounts_iter)?;
-        if rent_agreement_account.owner != program_id {
-            msg!(
-                "{} Rent agreement account is not owned by this program",
-                LOG_TAG_NAME
-            );
-            return Err(ProgramError::IncorrectProgramId);
-        }
+
+
+        //TODO
+        // if rent_agreement_account.owner != program_id {
+        //     msg!(
+        //         "{} Rent agreement account is not owned by this program",
+        //         LOG_TAG_NAME
+        //     );
+        //     return Err(ProgramError::IncorrectProgramId);
+        // }
+
+
+        Self::validate_program_owner(rent_agreement_account.owner, program_id)?;
+
+
+
 
         let rent_agreement_data =
             RentalAgreementAccount::try_from_slice(&rent_agreement_account.data.borrow());
@@ -289,6 +281,18 @@ impl Processor {
         rent_data.remaining_payments = 0;
         rent_data.status = AgreementStatus::Terminated as u8;
         rent_data.serialize(&mut &mut rent_agreement_account.data.borrow_mut()[..])?;
+
+        Ok(())
+    }
+
+    fn validate_program_owner(
+        expected_owner: &Pubkey,
+        program_id: &Pubkey,
+    ) -> ProgramResult {
+        if expected_owner != program_id {
+            msg!("{} Rent agreement account is not owned by this program", LOG_TAG_NAME);
+            return Err(ProgramError::IncorrectProgramId);
+        }
 
         Ok(())
     }
